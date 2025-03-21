@@ -1,5 +1,6 @@
 import random
 from config import ROWS, COLS, DIRECTIONS
+from enemy_ai import EnemyAI
 
 class Player:
     def __init__(self, x=1, y=1):
@@ -22,10 +23,22 @@ class Enemy:
         # Default to bottom right if not specified
         self.position = [x if x is not None else ROWS - 17, 
                         y if y is not None else COLS - 17]
+        self.ai = EnemyAI()  # Use the AI system
     
     # Move enemy in a random valid direction
-    def move(self, game_map):
-        direction = random.choice(list(DIRECTIONS.values()))
+    def move(self, game_map, player_position=None):
+        # If player position is provided, use AI to decide movement
+        if player_position is not None:
+            # Update AI mode based on perception
+            self.ai.update_mode(self.position, player_position, game_map)
+            
+            # Get movement direction from AI
+            direction = self.ai.decide_move(self.position, player_position, game_map)
+        else:
+            # Fallback to random movement if no player position
+            direction = random.choice(list(DIRECTIONS.values()))
+        
+        # Apply the move
         new_x = self.position[0] + direction[1]
         new_y = self.position[1] + direction[0]
         
@@ -61,8 +74,10 @@ class EntityManager:
     
     # Move all enemies
     def move_enemies(self):
+        player_pos = self.player.position
+        
         for enemy in self.enemies:
-            enemy.move(self.game_map)
+            enemy.move(self.game_map, player_pos)
     
     # Check if player collided with any enemy
     def check_collision(self):
