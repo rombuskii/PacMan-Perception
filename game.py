@@ -1,5 +1,5 @@
 import pygame
-from config import DIRECTIONS, GAME_TITLE, FRAME_DELAY
+from config import DIRECTIONS, GAME_TITLE, FPS, GAME_SPEED
 from map import Map
 from entities import EntityManager
 from render import Renderer
@@ -17,6 +17,13 @@ class Game:
         
         # Game state
         self.running = True
+        
+        # Initialize clock for frame rate control
+        self.clock = pygame.time.Clock()
+        
+        # Time tracking for fixed update step
+        self.last_update_time = 0
+        self.update_interval = 1000 / GAME_SPEED  # Milliseconds between game updates
 
     # Process pygame events
     def handle_events(self):
@@ -24,10 +31,23 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN and event.key in DIRECTIONS:
-                self.entity_manager.move_player(DIRECTIONS[event.key])
+                # Get the new direction
+                new_direction = DIRECTIONS[event.key]
+                
+                # Check if the move would be valid in this direction
+                player = self.entity_manager.player
+                new_x = player.position[0] + new_direction[1]
+                new_y = player.position[1] + new_direction[0]
+                
+                # Only change direction if the move is valid
+                if self.game_map.is_valid_move(new_x, new_y):
+                    player.current_direction = new_direction
     
     # Update game state
     def update(self):
+        # Continue player movement in current direction
+        self.entity_manager.continue_player_movement()
+        
         # Move enemies
         self.entity_manager.move_enemies()
         
@@ -49,9 +69,17 @@ class Game:
     def run(self):
         while self.running:
             self.handle_events()
-            self.update()
+            
+            # Check if it's time for a game update
+            current_time = pygame.time.get_ticks()
+            if current_time - self.last_update_time >= self.update_interval:
+                self.update()
+                self.last_update_time = current_time
+            
             self.render()
-            pygame.time.delay(FRAME_DELAY)
+            
+            # Maintain the frame rate for smooth rendering
+            self.clock.tick(FPS)
         
         pygame.quit()
 

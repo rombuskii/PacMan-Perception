@@ -4,6 +4,7 @@ from config import ROWS, COLS, DIRECTIONS
 class Player:
     def __init__(self, x=1, y=1):
         self.position = [x, y]
+        self.current_direction = None
     
     # Move player in the given direction if valid
     def move(self, direction, game_map):
@@ -19,8 +20,8 @@ class Player:
 class Enemy:
     def __init__(self, x=None, y=None):
         # Default to bottom right if not specified
-        self.position = [x if x is not None else ROWS - 2, 
-                        y if y is not None else COLS - 2]
+        self.position = [x if x is not None else ROWS - 17, 
+                        y if y is not None else COLS - 17]
     
     # Move enemy in a random valid direction
     def move(self, game_map):
@@ -49,6 +50,14 @@ class EntityManager:
     # Move the player in the given direction
     def move_player(self, direction):
         return self.player.move(direction, self.game_map)
+    
+    # Move player in current direction if set
+    def continue_player_movement(self):
+        if self.player.current_direction:
+            # Try to move in current direction
+            if not self.player.move(self.player.current_direction, self.game_map):
+                # If movement failed (hit a wall), we keep the current_direction
+                pass
     
     # Move all enemies
     def move_enemies(self):

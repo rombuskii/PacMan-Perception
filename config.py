@@ -3,8 +3,7 @@ import pygame
 # Game dimensions
 WIDTH, HEIGHT = 700, 700
 GRID_SIZE = 20
-# Update these values to match the actual map dimensions
-ROWS, COLS = 33, 31  # Match the actual size of the pacman_layout
+ROWS, COLS = 33, 31
 
 # Colors
 PLAYER_COLOR = (255, 255, 0)  # Yellow
@@ -23,4 +22,6 @@ DIRECTIONS = {
 
 # Game settings
 GAME_TITLE = "Pac-Man"
-FRAME_DELAY = 200
+FRAME_DELAY = 250
+FPS = 60  # Frames per second for smooth rendering
+GAME_SPEED = 5  # Game logic updates per second (adjust this for desired game speed)
