@@ -34,6 +34,9 @@ class Enemy:
             
             # Get movement direction from AI
             direction = self.ai.decide_move(self.position, player_position, game_map)
+            # Add fallback if AI returns None
+            if direction is None:
+                direction = random.choice(list(DIRECTIONS.values()))
         else:
             # Fallback to random movement if no player position
             direction = random.choice(list(DIRECTIONS.values()))
