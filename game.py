@@ -13,8 +13,11 @@ class Game:
         # Create game components
         self.game_map = Map()
         self.entity_manager = EntityManager(self.game_map)
-        self.renderer = Renderer()
+        # This is where you add enemies
+        self.entity_manager.add_enemy(x=5, y=11)
+        self.entity_manager.add_enemy(x=10, y=11)
         
+        self.renderer = Renderer()
         # Game state
         self.running = True
         

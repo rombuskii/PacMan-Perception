@@ -20,9 +20,7 @@ class Player:
 
 class Enemy:
     def __init__(self, x=None, y=None):
-        # Default to bottom right if not specified
-        self.position = [x if x is not None else ROWS - 17, 
-                        y if y is not None else COLS - 17]
+        self.position = [x, y]
         self.ai = EnemyAI()  # Use the AI system
     
     # Move enemy in a random valid direction
@@ -58,14 +56,13 @@ class EntityManager:
         
         # Initialize player position on the map
         self.game_map.set_position_empty(self.player.position[0], self.player.position[1])
-        
-        # Create enemies
-        for _ in range(num_enemies):
-            self.enemies.append(Enemy())
     
     # Move the player in the given direction
     def move_player(self, direction):
         return self.player.move(direction, self.game_map)
+    
+    def add_enemy(self, x, y):
+        self.enemies.append(Enemy(x, y))
     
     # Move player in current direction if set
     def continue_player_movement(self):
