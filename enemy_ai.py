@@ -16,7 +16,6 @@ class EnemyAI:
     def decide_move(self, enemy_position, player_position, game_map):
         if self.current_mode == "patrol":
             return self.patrol(enemy_position, game_map)
-        # ... existing code ...
     
     # This function represents the enemy's patrol mode
     # The enemy will move in a straight line until it hits a wall, then it will change direction

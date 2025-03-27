@@ -7,6 +7,7 @@ class Player:
         self.position = [x, y]
         self.current_direction = None
         self.intended_direction = None  # Store the last pressed key direction
+        self.renderer = None  # Will be set by EntityManager
     
     # Move player in the given direction if valid
     def move(self, direction, game_map):
@@ -19,7 +20,9 @@ class Player:
                 if game_map.is_valid_move(new_x, new_y):
                     self.position = [new_x, new_y]
                     self.current_direction = test_direction if test_direction == self.intended_direction else direction
-                    game_map.collect_point(new_x, new_y)
+                    collected, is_power, is_sound = game_map.collect_point(new_x, new_y)
+                    if collected and is_sound and self.renderer:
+                        self.renderer.start_sound_effect(new_x, new_y)
                     return True
         return False
 
@@ -58,9 +61,15 @@ class EntityManager:
         self.player = Player()
         self.enemies = []
         self.game_map = game_map
+        self.renderer = None  # Will be set by Game class
         
         # Initialize player position on the map
         self.game_map.set_position_empty(self.player.position[0], self.player.position[1])
+    
+    # This function allows entity manager to use renderer to trigger sound effect animations
+    def set_renderer(self, renderer):
+        self.renderer = renderer
+        self.player.renderer = renderer
     
     # Move the player in the given direction
     def move_player(self, direction):

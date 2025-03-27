@@ -10,6 +10,7 @@ PLAYER_COLOR = (255, 255, 0)  # Yellow
 ENEMY_COLOR = (255, 0, 0)     # Red
 WALL_COLOR = (0, 0, 255)      # Blue
 POINT_COLOR = (0, 255, 0)     # Green
+SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
 BG_COLOR = (0, 0, 0)          # Black
 
 # Movement directions

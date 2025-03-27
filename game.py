@@ -18,6 +18,10 @@ class Game:
         self.entity_manager.add_enemy(x=10, y=11)
         
         self.renderer = Renderer()
+
+        # Connect renderer to entity manager so the player can trigger sound effect animations
+        self.entity_manager.set_renderer(self.renderer)
+        
         # Game state
         self.running = True
         
@@ -77,10 +81,8 @@ class Game:
             if current_time - self.last_update_time >= self.update_interval:
                 self.update()
                 self.last_update_time = current_time
-            
+
             self.render()
-            
-            # Maintain the frame rate for smooth rendering
             self.clock.tick(FPS)
         
         pygame.quit()

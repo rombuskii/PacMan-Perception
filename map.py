@@ -11,7 +11,7 @@ class Map:
         # Define the layout with a larger scale
         pacman_layout = [
             "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-            "W.............................W",
+            "W..........................S..W",
             "W.WWWWW.WWWWWWW.WWWWWWW.WWWWW.W",
             "W.W   W.W     W.W     W.W   W.W",
             "W.W   W.W     W.W     W.W   W.W",
@@ -59,6 +59,8 @@ class Map:
                     self.occupancy_map[i, j] = -1
                 elif cell == '.':  # Regular pellet
                     self.occupancy_map[i, j] = 1
+                elif cell == 'S':  # Sound pellet
+                    self.occupancy_map[i, j] = 3
                 elif cell == ' ':  # Empty space
                     self.occupancy_map[i, j] = 0
     
@@ -75,11 +77,12 @@ class Map:
     
     # Collect a point at the given position
     def collect_point(self, x, y):
-        if self.occupancy_map[x, y] in [1, 2]:  # Regular or power pellet
+        if self.occupancy_map[x, y] in [1, 2, 3]:  # Regular, power, or sound pellet
             is_power_pellet = (self.occupancy_map[x, y] == 2)
+            is_sound_pellet = (self.occupancy_map[x, y] == 3)
             self.occupancy_map[x, y] = 0
-            return True, is_power_pellet
-        return False, False
+            return True, is_power_pellet, is_sound_pellet
+        return False, False, False
     
     # Check if all collectible points have been collected
     def check_win(self):
