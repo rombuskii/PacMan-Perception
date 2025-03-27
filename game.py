@@ -34,15 +34,14 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN and event.key in DIRECTIONS:
-                # Get the new direction
+                # Only set the intended direction
                 new_direction = DIRECTIONS[event.key]
+                self.entity_manager.player.intended_direction = new_direction
                 
-                # Check if the move would be valid in this direction
+                # Only set current_direction if it's a valid move
                 player = self.entity_manager.player
                 new_x = player.position[0] + new_direction[1]
                 new_y = player.position[1] + new_direction[0]
-                
-                # Only change direction if the move is valid
                 if self.game_map.is_valid_move(new_x, new_y):
                     player.current_direction = new_direction
     

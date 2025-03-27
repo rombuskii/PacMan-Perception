@@ -6,16 +6,21 @@ class Player:
     def __init__(self, x=1, y=1):
         self.position = [x, y]
         self.current_direction = None
+        self.intended_direction = None  # Store the last pressed key direction
     
     # Move player in the given direction if valid
     def move(self, direction, game_map):
-        new_x = self.position[0] + direction[1]
-        new_y = self.position[1] + direction[0]
-        
-        if game_map.is_valid_move(new_x, new_y):
-            self.position = [new_x, new_y]
-            game_map.collect_point(new_x, new_y)
-            return True
+        # Try intended direction first, then current direction
+        for test_direction in [self.intended_direction, direction]:
+            if test_direction:
+                new_x = self.position[0] + test_direction[1]
+                new_y = self.position[1] + test_direction[0]
+                
+                if game_map.is_valid_move(new_x, new_y):
+                    self.position = [new_x, new_y]
+                    self.current_direction = test_direction if test_direction == self.intended_direction else direction
+                    game_map.collect_point(new_x, new_y)
+                    return True
         return False
 
 class Enemy:
@@ -59,7 +64,7 @@ class EntityManager:
     
     # Move the player in the given direction
     def move_player(self, direction):
-        return self.player.move(direction, self.game_map)
+        pass  # We can either remove this method or keep it empty for now
     
     def add_enemy(self, x, y):
         self.enemies.append(Enemy(x, y))
@@ -67,10 +72,8 @@ class EntityManager:
     # Move player in current direction if set
     def continue_player_movement(self):
         if self.player.current_direction:
-            # Try to move in current direction
-            if not self.player.move(self.player.current_direction, self.game_map):
-                # If movement failed (hit a wall), we keep the current_direction
-                pass
+            # Try to move using the current direction
+            self.player.move(self.player.current_direction, self.game_map)
     
     # Move all enemies
     def move_enemies(self):
