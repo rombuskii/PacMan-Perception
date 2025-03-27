@@ -9,10 +9,48 @@ class EnemyPerception:
 class EnemyAI:
     def __init__(self):
         self.perception = EnemyPerception()
-        self.current_mode = "patrol"  # patrol, chase, scatter, etc.
+        self.current_mode = "patrol"  # patrol, seekSoundSource, runAway
+        self.patrol_direction = [0, 1]  # Initialize with a default direction
+        self.is_horizontal = True  # Track if moving horizontally or vertically
     
     def decide_move(self, enemy_position, player_position, game_map):
-        pass
+        if self.current_mode == "patrol":
+            return self.patrol(enemy_position, game_map)
+        # ... existing code ...
+    
+    # This function represents the enemy's patrol mode
+    # The enemy will move in a straight line until it hits a wall, then it will change direction
+    def patrol(self, enemy_position, game_map):
+        # Try to move in current direction
+        new_x = enemy_position[0] + self.patrol_direction[1]
+        new_y = enemy_position[1] + self.patrol_direction[0]
+        
+        # If current move is valid, keep going in same direction
+        if game_map.is_valid_move(new_x, new_y):
+            return self.patrol_direction
+            
+        # If we hit a wall, change direction
+        if self.is_horizontal:
+            # If moving horizontally (left/right), reverse direction
+            self.patrol_direction[1] *= -1
+            
+            # If still can't move, switch to vertical movement
+            new_x = enemy_position[0] + self.patrol_direction[1]
+            new_y = enemy_position[1] + self.patrol_direction[0]
+            if not game_map.is_valid_move(new_x, new_y):
+                self.is_horizontal = False
+                self.patrol_direction = [1, 0]  # Start moving down
+        else:
+            # If moving vertically (up/down), reverse direction
+            self.patrol_direction[0] *= -1
+            
+            # If still can't move, switch to horizontal movement
+            new_x = enemy_position[0] + self.patrol_direction[1]
+            new_y = enemy_position[1] + self.patrol_direction[0]
+            if not game_map.is_valid_move(new_x, new_y):
+                self.is_horizontal = True
+                self.patrol_direction = [0, 1]
+        return self.patrol_direction
     
     def calculate_path(self, start_position, target_position, game_map):
         pass
