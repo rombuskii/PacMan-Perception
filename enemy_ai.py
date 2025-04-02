@@ -45,13 +45,18 @@ class EnemyPerception:
 class EnemyAI:
     def __init__(self):
         self.perception = EnemyPerception()
-        self.current_mode = "patrol"  # patrol, chase, run away
+        self.current_mode = "chase"  # patrol, chase, run away
         self.patrol_direction = [0, 1]  # Initialize with a default direction
         self.is_horizontal = True  # Track if moving horizontally or vertically
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
     
     def update_mode(self, enemy_position, player_position, game_map):
         """Update the AI mode based on the game state."""
+        # Force chase mode for testing
+        self.current_mode = "chase"
+        
+        # OR comment out the original logic temporarily
+        """
         if self.perception.can_see_player(enemy_position, player_position, game_map):
             if game_map.is_power_pellet_active():
                 self.current_mode = "run away"
@@ -59,6 +64,7 @@ class EnemyAI:
                 self.current_mode = "chase"
         else:
             self.current_mode = "patrol"
+        """
     
     def decide_move(self, enemy_position, player_position, game_map):
         """Decide the next move for the enemy based on the current mode."""
@@ -144,16 +150,20 @@ class EnemyAI:
     
     def chase(self, enemy_position, player_position, game_map):
         """Chase mode: Move towards the player using the shortest path."""
+        # Create a distance map from the player's position
         distance_map = self.create_distance_map(player_position, game_map)
+        
+        # Find the direction that leads to the shortest path to the player
         best_move = (0, 0)
         shortest_distance = float('inf')
 
         for dx, dy in self.directions:
             new_x, new_y = enemy_position[0] + dx, enemy_position[1] + dy
             if game_map.is_valid_move(new_x, new_y):
+                # Check if this move gets us closer to the player
                 if distance_map[new_x][new_y] < shortest_distance:
                     shortest_distance = distance_map[new_x][new_y]
-                    best_move = (dx, dy)
+                    best_move = (dy, dx)  # Adjusted to match the format used in patrol_direction
 
         return best_move
     
