@@ -13,6 +13,12 @@ POINT_COLOR = (0, 255, 0)     # Green
 SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
 BG_COLOR = (0, 0, 0)          # Black
 
+# Distance map visualization
+DISTANCE_MAP_VISIBLE = False  # Toggle for distance map visualization
+DISTANCE_MAP_COLOR_MIN = (0, 0, 100)  # Dark blue for minimum distance
+DISTANCE_MAP_COLOR_MAX = (255, 0, 255)  # Purple for maximum distance
+DISTANCE_MAP_OPACITY = 150  # Alpha value for overlay (0-255)
+
 # Movement directions
 DIRECTIONS = {
     pygame.K_UP: (0, -1),
@@ -24,5 +30,5 @@ DIRECTIONS = {
 # Game settings
 GAME_TITLE = "Pac-Man"
 FRAME_DELAY = 250
-FPS = 60  # Frames per second for smooth rendering
-GAME_SPEED = 5  # Game logic updates per second (adjust this for desired game speed)
+FPS = 60 
+GAME_SPEED = 5 
