@@ -89,6 +89,7 @@ class EntityManager:
         self.enemies = []
         self.game_map = game_map
         self.renderer = None  # Will be set by Game class
+        self.game_over = False
         
         # Initialize player position on the map
         self.game_map.set_position_empty(self.player.position[0], self.player.position[1])
@@ -118,5 +119,6 @@ class EntityManager:
         """Check if the player has collided with any enemy."""
         for enemy in self.enemies:
             if enemy.position == self.player.position:
+                self.game_over = True  # Set game over state
                 return True
-        return False 
+        return False
