@@ -1,3 +1,6 @@
+import heapq
+
+
 class EnemyPerception:
     def __init__(self):
         self.perception_range = 10  # Default perception range
@@ -82,13 +85,9 @@ class EnemyAI:
         """
         Update the AI mode based on the game state.
         """
-        if self.perception.can_see_player(enemy_position, player_position, game_map):
-            if game_map.is_power_pellet_active():
-                self.current_mode = "run away"
-            else:
-                self.current_mode = "chase"
-        else:
-            self.current_mode = "patrol"
+        #if self.perception.can_see_player(enemy_position, player_position, game_map):
+            #if game_map.is_power_pellet_active():
+        pass
 
 
 def create_distance_map(self, start_position, game_map):
@@ -111,7 +110,7 @@ def create_distance_map(self, start_position, game_map):
             for dx, dy in directions:
                 neighbor_x, neighbor_y = current_x + dx, current_y + dy
 
-                if 0 <= neighbor_x < rows and 0 <= neighbor_y < cols and game_map[neighbor_x][neighbor_y] == 0:
+                if game_map.is_valid_move(neighbor_x, neighbor_y):
                     new_distance = current_distance + 1
 
                     if new_distance < distance_map[neighbor_x][neighbor_y]:
