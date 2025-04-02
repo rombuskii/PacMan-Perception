@@ -1,8 +1,6 @@
 import pygame
-from config import DIRECTIONS, GAME_TITLE, FPS, GAME_SPEED, DISTANCE_MAP_VISIBLE
-from map import Map
-from entities import EntityManager
-from render import Renderer
+import math
+import random
 
 class GameOverScreen:
     def __init__(self, screen, width, height, score=0):
@@ -39,18 +37,18 @@ class GameOverScreen:
             "cyan": (0, 255, 255)
         }
         
-        # Initialize ghosts
+        # Load ghost images or use placeholder
         self.ghosts = []
         ghost_colors = [self.colors["red"], self.colors["pink"], 
                         self.colors["cyan"], self.colors["orange"]]
         
         for color in ghost_colors:
             self.ghosts.append({
-                "x": pygame.time.get_ticks() % width,  # Distribute ghosts across screen
-                "y": 100 + (ghost_colors.index(color) * 50),  # Stack ghosts vertically with spacing
-                "speed": 2 + (ghost_colors.index(color) * 0.5),  # Different speeds
+                "x": random.randint(-50, self.width),
+                "y": random.randint(100, self.height - 100),
+                "speed": random.uniform(2, 5),
                 "color": color,
-                "direction": 1 if ghost_colors.index(color) % 2 == 0 else -1  # Alternate directions
+                "direction": random.choice([-1, 1])
             })
             
         # Pac-Man death animation frames
@@ -59,19 +57,12 @@ class GameOverScreen:
         self.frame_delay = 8
         self.frame_counter = 0
         
-        # Message to display
-        self.message = "Game Over!"
-        
-        # Try to play a death sound
+        # Sound effects
         try:
             self.death_sound = pygame.mixer.Sound("sounds/death.wav")
             self.death_sound.play()
         except:
             pass  # Sound is optional
-
-    def set_message(self, message):
-        """Set the message to display on the game over screen."""
-        self.message = message
 
     def draw_ghost(self, x, y, color):
         """Draw a classic Pac-Man ghost"""
@@ -119,14 +110,21 @@ class GameOverScreen:
             
             pygame.draw.arc(self.screen, self.colors["yellow"], 
                            (x - 30, y - 30, 60, 60),
-                           pygame.math.Vector2(0, -1).angle_to(pygame.math.Vector2(1, 0)) * (start_angle/360),
-                           pygame.math.Vector2(0, -1).angle_to(pygame.math.Vector2(1, 0)) * (end_angle/360), 30)
+                           math.radians(start_angle), 
+                           math.radians(end_angle), 30)
 
     def display_score(self):
         """Display the final score"""
         score_text = self.menu_font.render(f"FINAL SCORE: {self.score}", True, self.colors["white"])
-        score_rect = score_text.get_rect(center=(self.width // 2, self.height // 2 + 50))
+        score_rect = score_text.get_rect(center=(self.width // 2, self.height // 2))
         self.screen.blit(score_text, score_rect)
+
+    def display_high_scores(self):
+        """Display high scores section"""
+        # This could be expanded to load and save actual high scores
+        hs_text = self.menu_font.render("HIGH SCORES", True, self.colors["yellow"])
+        hs_rect = hs_text.get_rect(center=(self.width // 2, self.height // 2 + 100))
+        self.screen.blit(hs_text, hs_rect)
 
     def display(self):
         """Display the enhanced Game Over screen with animations"""
@@ -155,8 +153,8 @@ class GameOverScreen:
 
             if self.show_text:
                 # Draw with shadow for better visibility
-                game_over_shadow = self.title_font.render(self.message, True, (100, 0, 0))
-                game_over_text = self.title_font.render(self.message, True, self.colors["red"])
+                game_over_shadow = self.title_font.render("GAME OVER", True, (100, 0, 0))
+                game_over_text = self.title_font.render("GAME OVER", True, self.colors["red"])
                 
                 shadow_pos = (self.width // 2 - game_over_shadow.get_width() // 2 + 3, 
                               self.height // 4 + 3)
@@ -239,197 +237,3 @@ class GameOverScreen:
                 elif quit_rect.collidepoint(event.pos):
                     return "quit"
         return None
-
-
-class Game:
-    def __init__(self):
-        """Initialize the game components and state."""
-        # Initialize pygame
-        pygame.init()
-        pygame.display.set_caption(GAME_TITLE)
-        
-        # Create game components
-        self.game_map = Map()
-        self.entity_manager = EntityManager(self.game_map)
-        self.renderer = Renderer()
-        
-        # Add enemies to the game
-        self._setup_enemies()
-        
-        # Connect renderer to entity manager for sound effects
-        self.entity_manager.set_renderer(self.renderer)
-        
-        # Game state
-        self.running = True
-        self.show_distance_map = DISTANCE_MAP_VISIBLE
-        self.current_distance_map = None
-        
-        # Time tracking
-        self.clock = pygame.time.Clock()
-        self.last_update_time = 0
-        self.update_interval = 1000 / GAME_SPEED  # Milliseconds between updates
-        
-        # Score tracking
-        self.score = 0
-    
-    def _setup_enemies(self):
-        """Set up enemy entities in the game."""
-        self.entity_manager.add_enemy(x=5, y=11)
-        # Add more enemies as needed
-        # self.entity_manager.add_enemy(x=10, y=11)
-
-    def handle_events(self):
-        """Handle user input events."""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            elif event.type == pygame.KEYDOWN:
-                self._handle_keydown(event)
-    
-    def _handle_keydown(self, event):
-        """Process keyboard inputs."""
-        # Handle movement keys
-        if event.key in DIRECTIONS:
-            self._process_movement_input(DIRECTIONS[event.key])
-        # Toggle distance map visualization with 'D' key
-        elif event.key == pygame.K_d:
-            self._toggle_distance_map()
-    
-    def _process_movement_input(self, new_direction):
-        """Process player movement input."""
-        player = self.entity_manager.player
-        player.intended_direction = new_direction
-        
-        # Only set current_direction if the move is valid
-        new_x = player.position[0] + new_direction[1]
-        new_y = player.position[1] + new_direction[0]
-        if self.game_map.is_valid_move(new_x, new_y):
-            player.current_direction = new_direction
-    
-    def _toggle_distance_map(self):
-        """Toggle the distance map visualization on/off."""
-        self.show_distance_map = not self.show_distance_map
-        print(f"Distance map visualization: {'ON' if self.show_distance_map else 'OFF'}")
-        
-        # Immediately calculate the distance map when turning visualization on
-        if self.show_distance_map and len(self.entity_manager.enemies) > 0:
-            self._update_distance_map()
-            print("Distance map calculated")
-    
-    def _update_distance_map(self):
-        """Update the distance map for visualization."""
-        if len(self.entity_manager.enemies) > 0:
-            enemy = self.entity_manager.enemies[0]
-            player_pos = self.entity_manager.player.position
-            self.current_distance_map = enemy.ai.create_distance_map(player_pos, self.game_map)
-            
-    def show_game_over_screen(self, message):
-        """Display an enhanced Game Over screen with the given message."""
-        # Update the final score - You might need to adjust how score is tracked in your game
-        self.update_score()
-        
-        # Create and display the game over screen
-        screen_width = self.renderer.screen.get_width()
-        screen_height = self.renderer.screen.get_height()
-        
-        game_over = GameOverScreen(self.renderer.screen, screen_width, screen_height, self.score)
-        game_over.set_message(message)
-        
-        action = game_over.display()
-        
-        if action == "restart":
-            self.reset_game()
-        elif action == "quit":
-            self.running = False
-    
-    def update_score(self):
-        """Update the game score based on collected dots and power pellets."""
-        # This is a placeholder - adjust according to how you track score in your game
-        # If you don't have a specific score tracking mechanism yet, you could use:
-        # - Number of dots collected
-        # - Time survived
-        # - Other game metrics
-        
-        # Example: Score based on dots collected
-        try:
-            self.score = self.game_map.dots_collected * 10  # 10 points per dot
-            # Add power pellet points if applicable
-            self.score += self.game_map.power_pellets_collected * 50  # 50 points per power pellet
-        except AttributeError:
-            # If these attributes don't exist, create a simple score
-            self.score = 1000  # Placeholder score
-    
-    def reset_game(self):
-        """Reset the game to start a new round."""
-        # Reset map
-        self.game_map = Map()
-        
-        # Reset entities
-        self.entity_manager = EntityManager(self.game_map)
-        self.entity_manager.set_renderer(self.renderer)
-        self._setup_enemies()
-        
-        # Reset game state
-        self.show_distance_map = DISTANCE_MAP_VISIBLE
-        self.current_distance_map = None
-        self.last_update_time = pygame.time.get_ticks()
-        self.score = 0
-        
-        # Continue running
-        self.running = True
-    
-    def update(self):
-        """Update game state for one time step."""
-        # Update map state (power pellet duration, etc.)
-        self.game_map.update()
-        
-        # Continue player movement in current direction
-        self.entity_manager.continue_player_movement()
-        
-        # Update the distance map if visualization is enabled
-        if self.show_distance_map:
-            self._update_distance_map()
-        
-        # Move enemies
-        self.entity_manager.move_enemies()
-        
-        # Check game end conditions
-        self._check_game_end_conditions()
-    
-                
-    def _check_game_end_conditions(self):
-        """Check if the game should end."""
-        if self.entity_manager.check_collision():
-            self.show_game_over_screen("GAME OVER")
-    
-        if self.game_map.check_win():
-            self.show_game_over_screen("YOU WIN!")
-    
-    def render(self):
-        """Render the current game state."""
-        self.renderer.render(
-            self.game_map, 
-            self.entity_manager, 
-            show_distance_map=self.show_distance_map, 
-            distance_map=self.current_distance_map
-        )
-    
-    def run(self):
-        """Main game loop."""
-        while self.running:
-            self.handle_events()
-            
-            # Update game at fixed time intervals
-            current_time = pygame.time.get_ticks()
-            if current_time - self.last_update_time >= self.update_interval:
-                self.update()
-                self.last_update_time = current_time
-
-            self.render()
-            self.clock.tick(FPS)
-        
-        pygame.quit()
-
-if __name__ == "__main__":
-    game = Game()
-    game.run()
