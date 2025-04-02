@@ -143,12 +143,60 @@ class Renderer:
         for enemy in enemies:
             rect = pygame.Rect(enemy.position[1] * GRID_SIZE, enemy.position[0] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
             pygame.draw.rect(self.screen, ENEMY_COLOR, rect)
+    def draw_enemy_vision(self, game_map, enemy_vision_data):
+        """Draw enemy vision lines along rows and columns."""
+        # Create a surface for vision with transparency
+        vision_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        
+        for enemy_data in enemy_vision_data:
+            enemy_row, enemy_col = enemy_data['position']
+            player_in_sight = enemy_data['player_in_sight']
+            vision_color = VISION_WARNING_COLOR if player_in_sight else VISION_COLOR
+            
+            # Draw vision in all four directions
+            directions = [
+                (0, -1, 0, enemy_col),  # Left
+                (0, 1, 0, enemy_col),   # Right
+                (-1, 0, enemy_row, 0),  # Up
+                (1, 0, enemy_row, 0)    # Down
+            ]
+            
+            for dr, dc, base_row, base_col in directions:
+                self._draw_vision_line(vision_surface, game_map, enemy_row, enemy_col, dr, dc, vision_color)
+    
+        # Add vision overlay to screen
+        self.screen.blit(vision_surface, (0, 0))
+
+    def _draw_vision_line(self, surface, game_map, enemy_row, enemy_col, dr, dc, color):
+        """Draw a line of sight in a specific direction, stopping at walls."""
+        # Start from the position next to the enemy
+        curr_row, curr_col = enemy_row + dr, enemy_col + dc
+        
+        # Continue until hitting a wall or the edge of the map
+        while (0 <= curr_row < game_map.occupancy_map.shape[0] and 
+            0 <= curr_col < game_map.occupancy_map.shape[1]):
+            
+            # Stop at walls
+            if game_map.occupancy_map[curr_row, curr_col] == -1:
+                break
+                
+            # Draw vision tile
+            rect = pygame.Rect(curr_col * GRID_SIZE, curr_row * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+            pygame.draw.rect(surface, color, rect)
+            
+            # Move to next position in this direction
+            curr_row += dr
+            curr_col += dc
     
     def render(self, game_map, entity_manager, show_distance_map=False, distance_map=None):
         """Render the complete game state."""
         # Draw basic elements
         self.clear_screen()
         self.draw_grid(game_map)
+        
+        # Get and draw enemy vision
+        enemy_vision_data = entity_manager.get_enemy_vision_data()
+        self.draw_enemy_vision(game_map, enemy_vision_data)
         
         # Draw distance map if enabled
         if show_distance_map and distance_map is not None:

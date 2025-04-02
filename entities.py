@@ -119,4 +119,21 @@ class EntityManager:
         for enemy in self.enemies:
             if enemy.position == self.player.position:
                 return True
-        return False 
+        return False
+    
+    def get_enemy_vision_data(self):
+        """Get vision data for all enemies."""
+        vision_data = []
+        player_pos = self.player.position
+        
+        for enemy in self.enemies:
+            # Get enemy vision data
+            enemy_position = enemy.position
+            player_in_sight = enemy.ai.perception.can_see_player(enemy_position, player_pos, self.game_map)
+            
+            vision_data.append({
+                'position': enemy_position,
+                'player_in_sight': player_in_sight
+            })
+            
+        return vision_data 

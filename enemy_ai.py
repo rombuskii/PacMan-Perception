@@ -44,8 +44,7 @@ class EnemyAI:
         self.patrol_direction = [0, 1]  # Initialize with a default direction
         self.is_horizontal = True  # Track if moving horizontally or vertically
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
-        self.chase_timer = 0
-        self.chase_duration = 10  # 10 seconds chase duration
+        self.chase_timer = 2
         self.last_update_time = 0
     
     def update_mode(self, enemy_position, player_position, game_map, current_time=None):
@@ -67,9 +66,8 @@ class EnemyAI:
         
         # Player spotted - start/continue chase
         if can_see_player:
-            print("Player spotted - starting chase")
             self.current_mode = "chase"
-            self.chase_timer = self.chase_duration  # Reset chase timer to full duration
+            self.chase_timer = 2  # Reset chase timer to full duration
             return
             
         # Update chase timer if in chase mode
@@ -91,42 +89,25 @@ class EnemyAI:
     
     def create_distance_map(self, start_position, game_map):
         """Creates a distance map using Dijkstra's algorithm from the start position."""
-        # Get the dimensions of the map
         height, width = game_map.occupancy_map.shape
-        
-        # Initialize distance map with infinity for all cells
         distance_map = [[float('inf') for _ in range(width)] for _ in range(height)]
-        
-        # Set distance for starting position
         distance_map[start_position[0]][start_position[1]] = 0
         
-        # Initialize the priority queue for Dijkstra's algorithm
         priority_queue = []
         heapq.heappush(priority_queue, (0, start_position[0], start_position[1]))
         
-        # Process queue until empty
         while priority_queue:
-            # Get cell with smallest distance
             current_distance, current_x, current_y = heapq.heappop(priority_queue)
             
-            # If we've already found a better path to this cell, skip it
             if current_distance > distance_map[current_x][current_y]:
                 continue
-            
-            # Check all neighbors
             for dx, dy in self.directions:
                 new_x, new_y = current_x + dx, current_y + dy
-                
-                # Check if the move is valid (within bounds and not a wall)
                 if game_map.is_valid_move(new_x, new_y):
-                    # Calculate new distance (1 unit per move)
                     new_distance = current_distance + 1
-                    
-                    # If we found a better path, update the distance
                     if new_distance < distance_map[new_x][new_y]:
                         distance_map[new_x][new_y] = new_distance
                         heapq.heappush(priority_queue, (new_distance, new_x, new_y))
-        
         return distance_map
     
     def patrol(self, enemy_position, game_map):
@@ -164,20 +145,17 @@ class EnemyAI:
     
     def chase(self, enemy_position, player_position, game_map):
         """Chase mode: Move towards the player using the shortest path."""
-        # Create a distance map from the player's position
         distance_map = self.create_distance_map(player_position, game_map)
         
-        # Find the direction that leads to the shortest path to the player
         best_move = (0, 0)
         shortest_distance = float('inf')
 
         for dx, dy in self.directions:
             new_x, new_y = enemy_position[0] + dx, enemy_position[1] + dy
             if game_map.is_valid_move(new_x, new_y):
-                # Check if this move gets us closer to the player
                 if distance_map[new_x][new_y] < shortest_distance:
                     shortest_distance = distance_map[new_x][new_y]
-                    best_move = (dy, dx)  # Adjusted to match the format used in patrol_direction
+                    best_move = (dy, dx)
 
         return best_move
     
