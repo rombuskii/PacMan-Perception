@@ -8,10 +8,39 @@ class EnemyPerception:
         """Calculate the Manhattan distance between two positions."""
         return abs(start_position[0] - target_position[0]) + abs(start_position[1] - target_position[1])
     
+    def is_line_of_sight_clear(self, enemy_position, player_position, game_map):
+        """
+        Check if there are obstacles (walls) between the enemy and the player using Bresenham's algorithm.
+        """
+        x1, y1 = enemy_position
+        x2, y2 = player_position
+        
+        dx = abs(x2 - x1)
+        dy = abs(y2 - y1)
+        sx = 1 if x1 < x2 else -1
+        sy = 1 if y1 < y2 else -1
+        err = dx - dy
+
+        while (x1, y1) != (x2, y2):
+            if game_map.occupancy_map[y1, x1] == -1:  # Check if it's a wall
+                return False
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x1 += sx
+            if e2 < dx:
+                err += dx
+                y1 += sy
+
+        return True  # No walls blocking the view
+    
     def can_see_player(self, enemy_position, player_position, game_map):
         """Check if the enemy can see the player within the perception range."""
         distance = self.calculate_distance(enemy_position, player_position)
-        return distance <= self.perception_range
+        if distance > self.perception_range:
+            return False  # Player is too far
+
+        return self.is_line_of_sight_clear(enemy_position, player_position, game_map)
         
 class EnemyAI:
     def __init__(self):
