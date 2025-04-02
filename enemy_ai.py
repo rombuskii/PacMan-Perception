@@ -1,70 +1,84 @@
 import heapq
+import time
 
 class EnemyPerception:
-    def __init__(self):
-        self.perception_range = 10  # Default perception range
-    
+
     def calculate_distance(self, start_position, target_position):
         """Calculate the Manhattan distance between two positions."""
         return abs(start_position[0] - target_position[0]) + abs(start_position[1] - target_position[1])
-    
-    def is_line_of_sight_clear(self, enemy_position, player_position, game_map):
-        """
-        Check if there are obstacles (walls) between the enemy and the player using Bresenham's algorithm.
-        """
-        x1, y1 = enemy_position
-        x2, y2 = player_position
-        
-        dx = abs(x2 - x1)
-        dy = abs(y2 - y1)
-        sx = 1 if x1 < x2 else -1
-        sy = 1 if y1 < y2 else -1
-        err = dx - dy
 
-        while (x1, y1) != (x2, y2):
-            if game_map.occupancy_map[y1, x1] == -1:  # Check if it's a wall
-                return False
-            e2 = 2 * err
-            if e2 > -dy:
-                err -= dy
-                x1 += sx
-            if e2 < dx:
-                err += dx
-                y1 += sy
-
-        return True  # No walls blocking the view
-    
     def can_see_player(self, enemy_position, player_position, game_map):
-        """Check if the enemy can see the player within the perception range."""
-        distance = self.calculate_distance(enemy_position, player_position)
-        if distance > self.perception_range:
-            return False  # Player is too far
-
-        return self.is_line_of_sight_clear(enemy_position, player_position, game_map)
+        """
+        Check if the enemy can see the player by looking in straight lines (horizontal and vertical).
+        Stops checking when it hits a wall.
+        """
+        # Get positions
+        enemy_row, enemy_col = enemy_position
+        player_row, player_col = player_position
         
+        # Check if player is on the same row (horizontal line)
+        if enemy_row == player_row:
+            # Check if there's a clear horizontal path
+            start_col, end_col = min(enemy_col, player_col), max(enemy_col, player_col)
+            for check_col in range(int(start_col) + 1, int(end_col)):
+                if game_map.occupancy_map[enemy_row, check_col] == -1:  # Wall found
+                    return False
+            return True
+        
+        # Check if player is on the same column (vertical line)
+        if enemy_col == player_col:
+            # Check if there's a clear vertical path
+            start_row, end_row = min(enemy_row, player_row), max(enemy_row, player_row)
+            for check_row in range(int(start_row) + 1, int(end_row)):
+                if game_map.occupancy_map[check_row, enemy_col] == -1:  # Wall found
+                    return False
+            return True
+        
+        # Not in the same row or column, so can't see player
+        return False
+
 class EnemyAI:
     def __init__(self):
         self.perception = EnemyPerception()
-        self.current_mode = "chase"  # patrol, chase, run away
+        self.current_mode = "patrol"  # patrol, chase, run away
         self.patrol_direction = [0, 1]  # Initialize with a default direction
         self.is_horizontal = True  # Track if moving horizontally or vertically
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+        self.chase_timer = 0
+        self.chase_duration = 10  # 10 seconds chase duration
+        self.last_update_time = 0
     
-    def update_mode(self, enemy_position, player_position, game_map):
-        """Update the AI mode based on the game state."""
-        # Force chase mode for testing
-        self.current_mode = "chase"
+    def update_mode(self, enemy_position, player_position, game_map, current_time=None):
+        """Update the AI mode based on whether the enemy can see the player."""
+        # If current_time is not provided, get the current time
+        if current_time is None:
+            current_time = time.time()
         
-        # OR comment out the original logic temporarily
-        """
-        if self.perception.can_see_player(enemy_position, player_position, game_map):
-            if game_map.is_power_pellet_active():
-                self.current_mode = "run away"
-            else:
-                self.current_mode = "chase"
-        else:
-            self.current_mode = "patrol"
-        """
+        # Initialize last_update_time if this is the first update
+        if self.last_update_time == 0:
+            self.last_update_time = current_time
+        
+        # Calculate time delta since last update
+        dt = current_time - self.last_update_time
+        self.last_update_time = current_time
+        
+        # Check if enemy can see player
+        can_see_player = self.perception.can_see_player(enemy_position, player_position, game_map)
+        
+        # Player spotted - start/continue chase
+        if can_see_player:
+            print("Player spotted - starting chase")
+            self.current_mode = "chase"
+            self.chase_timer = self.chase_duration  # Reset chase timer to full duration
+            return
+            
+        # Update chase timer if in chase mode
+        if self.current_mode == "chase":
+            self.chase_timer -= dt
+            if self.chase_timer <= 0:
+                # Chase timeout - go back to patrol
+                self.current_mode = "patrol"
+                self.chase_timer = 0
     
     def decide_move(self, enemy_position, player_position, game_map):
         """Decide the next move for the enemy based on the current mode."""
@@ -181,4 +195,3 @@ class EnemyAI:
                     best_move = (dx, dy)
 
         return best_move
-
