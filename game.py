@@ -1,5 +1,5 @@
 import pygame
-from config import DIRECTIONS, GAME_TITLE, FPS, GAME_SPEED, DISTANCE_MAP_VISIBLE
+from config import DIRECTIONS, GAME_TITLE, FPS, GAME_SPEED, DISTANCE_MAP_VISIBLE, ENEMY_SPEED_FACTOR
 from map import Map
 from entities import EntityManager
 from render import Renderer
@@ -30,13 +30,15 @@ class Game:
         # Time tracking
         self.clock = pygame.time.Clock()
         self.last_update_time = 0
+        self.last_enemy_update_time = 0  # Track enemy updates separately
         self.update_interval = 1000 / GAME_SPEED  # Milliseconds between updates
+        self.enemy_update_interval = 1000 / (GAME_SPEED / ENEMY_SPEED_FACTOR)  # Slower enemy updates
     
     def _setup_enemies(self):
         """Set up enemy entities in the game."""
         self.entity_manager.add_enemy(x=5, y=11)
         # Add more enemies as needed
-        # self.entity_manager.add_enemy(x=10, y=11)
+        self.entity_manager.add_enemy(x=10, y=11)
 
     def handle_events(self):
         """Handle user input events."""
@@ -85,6 +87,8 @@ class Game:
     
     def update(self):
         """Update game state for one time step."""
+        current_time = pygame.time.get_ticks()
+        
         # Update map state (power pellet duration, etc.)
         self.game_map.update()
         
@@ -95,8 +99,10 @@ class Game:
         if self.show_distance_map:
             self._update_distance_map()
         
-        # Move enemies
-        self.entity_manager.move_enemies()
+        # Move enemies less frequently (slower)
+        if current_time - self.last_enemy_update_time >= self.enemy_update_interval:
+            self.entity_manager.move_enemies()
+            self.last_enemy_update_time = current_time
         
         # Check game end conditions
         self._check_game_end_conditions()

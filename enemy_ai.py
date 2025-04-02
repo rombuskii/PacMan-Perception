@@ -1,6 +1,6 @@
 import heapq
 import time
-
+from config import CHASE_DURATION
 class EnemyPerception:
 
     def calculate_distance(self, start_position, target_position):
@@ -44,7 +44,7 @@ class EnemyAI:
         self.patrol_direction = [0, 1]  # Initialize with a default direction
         self.is_horizontal = True  # Track if moving horizontally or vertically
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
-        self.chase_timer = 2
+        self.chase_timer = CHASE_DURATION
         self.last_update_time = 0
     
     def update_mode(self, enemy_position, player_position, game_map, current_time=None):
@@ -67,7 +67,7 @@ class EnemyAI:
         # Player spotted - start/continue chase
         if can_see_player:
             self.current_mode = "chase"
-            self.chase_timer = 2  # Reset chase timer to full duration
+            self.chase_timer = CHASE_DURATION
             return
             
         # Update chase timer if in chase mode
