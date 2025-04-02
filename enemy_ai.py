@@ -77,7 +77,8 @@ class EnemyAI:
             return self.chase(enemy_position, player_position, game_map)
          elif self.current_mode == "run away":
             return self.run_away(enemy_position, player_position, game_map)
-def update_mode(self, enemy_position, player_position, game_map):
+        
+    def update_mode(self, enemy_position, player_position, game_map):
         """
         Update the AI mode based on the game state.
         """
