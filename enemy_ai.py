@@ -48,7 +48,7 @@ class EnemyAI:
         self.last_update_time = 0
     
     def update_mode(self, enemy_position, player_position, game_map, current_time=None):
-        """Update the AI mode based on whether the enemy can see the player."""
+        """Update the AI mode based on whether the enemy can see the player or if power pellet is active."""
         # If current_time is not provided, get the current time
         if current_time is None:
             current_time = time.time()
@@ -61,6 +61,11 @@ class EnemyAI:
         dt = current_time - self.last_update_time
         self.last_update_time = current_time
         
+        # Check if power pellet is active - this takes precedence over other modes
+        if game_map.is_power_pellet_active():
+            self.current_mode = "run away"
+            return
+        
         # Check if enemy can see player
         can_see_player = self.perception.can_see_player(enemy_position, player_position, game_map)
         
@@ -69,7 +74,7 @@ class EnemyAI:
             self.current_mode = "chase"
             self.chase_timer = CHASE_DURATION
             return
-            
+        
         # Update chase timer if in chase mode
         if self.current_mode == "chase":
             self.chase_timer -= dt
@@ -160,16 +165,23 @@ class EnemyAI:
         return best_move
     
     def run_away(self, enemy_position, player_position, game_map):
-        """Run away mode: Move away from the player using the longest path."""
-        distance_map = self.create_distance_map(player_position, game_map)
+        """Run away mode: Move away from the player as far as possible."""
+        player_distance_map = self.create_distance_map(player_position, game_map)
+        
+        # Find the best direction to maximize distance from player
         best_move = (0, 0)
-        longest_distance = -1
-
+        max_distance = -1
+        
+        # Check all four directions
         for dx, dy in self.directions:
             new_x, new_y = enemy_position[0] + dx, enemy_position[1] + dy
             if game_map.is_valid_move(new_x, new_y):
-                if distance_map[new_x][new_y] > longest_distance:
-                    longest_distance = distance_map[new_x][new_y]
-                    best_move = (dx, dy)
-
+                distance = player_distance_map[new_x][new_y]
+                if distance == float('inf'):
+                    return (dy, dx)
+                
+                if distance > max_distance:
+                    max_distance = distance
+                    best_move = (dy, dx)
+        
         return best_move
