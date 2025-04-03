@@ -276,7 +276,9 @@ class Game:
         """Set up enemy entities in the game."""
         self.entity_manager.add_enemy(x=5, y=11)
         # Add more enemies as needed
-        # self.entity_manager.add_enemy(x=10, y=11)
+        self.entity_manager.add_enemy(x=10, y=11)
+        self.entity_manager.add_enemy(x=30, y=11)
+        self.entity_manager.add_enemy(x=20, y=11)
 
     def handle_events(self):
         """Handle user input events."""
@@ -344,20 +346,18 @@ class Game:
     
     def update_score(self):
         """Update the game score based on collected dots and power pellets."""
-        # This is a placeholder - adjust according to how you track score in your game
-        # If you don't have a specific score tracking mechanism yet, you could use:
-        # - Number of dots collected
-        # - Time survived
-        # - Other game metrics
-        
-        # Example: Score based on dots collected
+        # Calculate score from map collections
+        map_score = 0
         try:
-            self.score = self.game_map.dots_collected * 10  # 10 points per dot
+            map_score = self.game_map.dots_collected * 10  # 10 points per dot
             # Add power pellet points if applicable
-            self.score += self.game_map.power_pellets_collected * 50  # 50 points per power pellet
+            map_score += self.game_map.power_pellets_collected * 50  # 50 points per power pellet
         except AttributeError:
-            # If these attributes don't exist, create a simple score
-            self.score = 1000  # Placeholder score
+            # If these attributes don't exist, use a placeholder
+            map_score = 0
+        
+        # Add the entity manager's score (points from eating enemies)
+        self.score = map_score + self.entity_manager.score
     
     def reset_game(self):
         """Reset the game to start a new round."""

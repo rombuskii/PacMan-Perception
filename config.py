@@ -13,6 +13,7 @@ ENEMY_CHASE_COLOR_2 = (0, 0, 255)     # Blue
 WALL_COLOR = (75, 0, 130)        # Purple
 POINT_COLOR = (0, 255, 0)     # Green
 SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
+ENEMY_INVESTIGATE_COLOR = (255, 165, 0)  # Orange 
 BG_COLOR = (0, 0, 0)          # Black
 POWER_PELLET_COLOR = (0, 191, 255)  # Deep Sky Blue
 ENEMY_RUNAWAY_COLOR = (255, 255, 255)  # White

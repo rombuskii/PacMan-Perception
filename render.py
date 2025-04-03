@@ -153,6 +153,8 @@ class Renderer:
                 color = ENEMY_CHASE_COLOR_1 if (current_time // 500) % 2 == 0 else ENEMY_CHASE_COLOR_2
             elif enemy.ai.current_mode == "run away":
                 color = ENEMY_RUNAWAY_COLOR
+            elif enemy.ai.current_mode == "investigate_sound":
+                color = SOUND_PALLET_COLOR
             else:
                 color = ENEMY_COLOR
                 

@@ -1,6 +1,7 @@
 import heapq
 import time
 from config import CHASE_DURATION
+
 class EnemyPerception:
 
     def calculate_distance(self, start_position, target_position):
@@ -40,15 +41,16 @@ class EnemyPerception:
 class EnemyAI:
     def __init__(self):
         self.perception = EnemyPerception()
-        self.current_mode = "patrol"  # patrol, chase, run away
+        self.current_mode = "patrol"  # patrol, chase, run away, investigate_sound
         self.patrol_direction = [0, 1]  # Initialize with a default direction
         self.is_horizontal = True  # Track if moving horizontally or vertically
         self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
         self.chase_timer = CHASE_DURATION
         self.last_update_time = 0
+        self.sound_location = None  # Store sound pellet location when heard
     
-    def update_mode(self, enemy_position, player_position, game_map, current_time=None):
-        """Update the AI mode based on whether the enemy can see the player or if power pellet is active."""
+    def update_mode(self, enemy_position, player_position, game_map, sound_position=None, current_time=None):
+        """Update the AI mode based on the game state."""
         # If current_time is not provided, get the current time
         if current_time is None:
             current_time = time.time()
@@ -80,6 +82,20 @@ class EnemyAI:
             self.chase_timer = CHASE_DURATION
             return
         
+        # If sound is detected and we're not already investigating
+        if sound_position is not None and self.current_mode != "investigate_sound":
+            self.current_mode = "investigate_sound"
+            self.sound_location = sound_position
+            return
+        
+        # If investigating sound and reached the location
+        if self.current_mode == "investigate_sound" and self.sound_location is not None:
+            if enemy_position[0] == self.sound_location[0] and enemy_position[1] == self.sound_location[1]:
+                # Reached the sound source, switch back to patrol
+                self.current_mode = "patrol"
+                self.sound_location = None
+                return
+        
         # Update chase timer if in chase mode
         if self.current_mode == "chase":
             self.chase_timer -= dt
@@ -96,6 +112,30 @@ class EnemyAI:
             return self.chase(enemy_position, player_position, game_map)
         elif self.current_mode == "run away":
             return self.run_away(enemy_position, player_position, game_map)
+        elif self.current_mode == "investigate_sound" and self.sound_location is not None:
+            return self.investigate_sound(enemy_position, game_map)
+        return self.patrol(enemy_position, game_map)  # Default to patrol
+    
+    def investigate_sound(self, enemy_position, game_map):
+        """Investigate sound mode: Move towards the sound source."""
+        if self.sound_location is None:
+            return self.patrol(enemy_position, game_map)
+        
+        # Create distance map from the sound location
+        distance_map = self.create_distance_map(self.sound_location, game_map)
+        
+        # Find shortest path to sound location
+        best_move = (0, 0)
+        shortest_distance = float('inf')
+
+        for dx, dy in self.directions:
+            new_x, new_y = enemy_position[0] + dx, enemy_position[1] + dy
+            if game_map.is_valid_move(new_x, new_y):
+                if distance_map[new_x][new_y] < shortest_distance:
+                    shortest_distance = distance_map[new_x][new_y]
+                    best_move = (dy, dx)
+
+        return best_move
     
     def create_distance_map(self, start_position, game_map):
         """Creates a distance map using Dijkstra's algorithm from the start position."""
