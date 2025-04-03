@@ -1,5 +1,5 @@
 import random
-from config import ROWS, COLS, DIRECTIONS
+from config import *
 from enemy_ai import EnemyAI
 
 class Player:
@@ -36,18 +36,24 @@ class Enemy:
         self.position = [x, y]
         self.previous_position = [x, y]  # Initialize previous position
         self.ai = EnemyAI()  # AI system for enemy behavior
+        self.move_counter = 0  # Counter for movement speed control
+        self.next_direction = None  # Store next planned direction
 
 
     def move(self, game_map, player_position=None):
         """
         Move the enemy based on AI or random movement.
+        Always updates AI decisions but applies movement at a reduced rate.
         Returns True if movement was successful, False otherwise.
         """    
-        # Determine the movement direction
-        direction = self._get_movement_direction(game_map, player_position)
+        self.next_direction = self._get_movement_direction(game_map, player_position)
         
-        # Apply the move
-        return self._apply_move(direction, game_map)
+        # Only apply movement at reduced speed determined by ENEMY_SPEED_FACTOR
+        self.move_counter += 1
+        if self.move_counter >= ENEMY_SPEED_FACTOR:
+            self.move_counter = 0
+            return self._apply_move(self.next_direction, game_map)
+        return False
     
     def _get_movement_direction(self, game_map, player_position):
         """Determine which direction the enemy should move."""
@@ -85,9 +91,7 @@ class EntityManager:
         self.enemies = []
         self.game_map = game_map
         self.renderer = None  # Will be set by Game class
-        
-        # Initialize player position on the map
-        self.game_map.set_position_empty(self.player.position[0], self.player.position[1])
+        self.game_map.set_position_empty(self.player.position[0], self.player.position[1]) # Initialize player position on the map
     
     def set_renderer(self, renderer):
         self.renderer = renderer
