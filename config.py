@@ -8,7 +8,9 @@ ROWS, COLS = 33, 31
 # Colors
 PLAYER_COLOR = (255, 255, 0)  # Yellow
 ENEMY_COLOR = (255, 0, 0)     # Red
-WALL_COLOR = (0, 0, 255)      # Blue
+ENEMY_CHASE_COLOR_1 = (255, 0, 0)     # Red
+ENEMY_CHASE_COLOR_2 = (0, 0, 255)     # Blue
+WALL_COLOR = (75, 0, 130)        # Purple
 POINT_COLOR = (0, 255, 0)     # Green
 SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
 BG_COLOR = (0, 0, 0)          # Black
@@ -19,7 +21,7 @@ VISION_WARNING_COLOR = (255, 0, 0, 170)  # Brighter red for player in sight
 
 # Distance map visualization
 DISTANCE_MAP_VISIBLE = False  # Toggle for distance map visualization
-DISTANCE_MAP_COLOR_MIN = (0, 0, 100)  # Dark blue for minimum distance
+DISTANCE_MAP_COLOR_MIN = (0, 0, 100)  # Dark blue for minimum distancess
 DISTANCE_MAP_COLOR_MAX = (255, 0, 255)  # Purple for maximum distance
 DISTANCE_MAP_OPACITY = 150  # Alpha value for overlay (0-255)
 

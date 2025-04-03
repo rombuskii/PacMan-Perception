@@ -47,7 +47,7 @@ class Enemy:
         """
         Move the enemy based on AI or random movement.
         Returns True if movement was successful, False otherwise.
-        """
+        """    
         # Determine the movement direction
         direction = self._get_movement_direction(game_map, player_position)
         

@@ -140,9 +140,21 @@ class Renderer:
     
     def draw_enemies(self, enemies):
         """Draw all enemies at their current positions."""
+        # Get current time in milliseconds to determine color
+        current_time = pygame.time.get_ticks()
+        
         for enemy in enemies:
             rect = pygame.Rect(enemy.position[1] * GRID_SIZE, enemy.position[0] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
-            pygame.draw.rect(self.screen, ENEMY_COLOR, rect)
+            
+            # Determine color based on enemy mode
+            if enemy.ai.current_mode == "chase":
+                # Change color every 500ms (0.5 seconds)
+                color = ENEMY_CHASE_COLOR_1 if (current_time // 500) % 2 == 0 else ENEMY_CHASE_COLOR_2
+            else:
+                color = ENEMY_COLOR
+                
+            pygame.draw.rect(self.screen, color, rect)
+    
     def draw_enemy_vision(self, game_map, enemy_vision_data):
         """Draw enemy vision lines along rows and columns."""
         # Create a surface for vision with transparency
