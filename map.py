@@ -1,5 +1,5 @@
 import numpy as np
-from config import ROWS, COLS
+from config import *
 
 class Map:
     """
@@ -121,7 +121,7 @@ class Map:
     def _activate_power_pellet(self):
         """Activate the power pellet effect for a duration."""
         self.power_pellet_active = True
-        self.power_pellet_duration = 200  # Duration in game ticks
+        self.power_pellet_duration = POWER_PELLET_DURATION  # Use value from config.py
     
     def update(self):
         """Update the map state (e.g., power pellet duration)."""

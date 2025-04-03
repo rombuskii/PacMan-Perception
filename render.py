@@ -165,6 +165,12 @@ class Renderer:
         for enemy_data in enemy_vision_data:
             enemy_row, enemy_col = enemy_data['position']
             player_in_sight = enemy_data['player_in_sight']
+            mode = enemy_data.get('mode', None)
+            
+            # Skip drawing vision if enemy is in "run away" mode
+            if mode == "run away":
+                continue
+                
             vision_color = VISION_WARNING_COLOR if player_in_sight else VISION_COLOR
             
             # Draw vision in all four directions

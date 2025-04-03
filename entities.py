@@ -138,7 +138,8 @@ class EntityManager:
             
             vision_data.append({
                 'position': enemy_position,
-                'player_in_sight': player_in_sight
+                'player_in_sight': player_in_sight,
+                'mode': enemy.ai.current_mode
             })
             
         return vision_data 

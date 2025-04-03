@@ -15,6 +15,7 @@ POINT_COLOR = (0, 255, 0)     # Green
 SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
 BG_COLOR = (0, 0, 0)          # Black
 POWER_PELLET_COLOR = (0, 191, 255)  # Deep Sky Blue
+ENEMY_RUNAWAY_COLOR = (255, 255, 255)  # White
 
 # Enemy vision
 VISION_COLOR = (255, 0, 0, 70)  # Semi-transparent red
@@ -41,5 +42,4 @@ FPS = 60
 GAME_SPEED = 5 
 ENEMY_SPEED_FACTOR = 1.1
 CHASE_DURATION = 3
-POWER_PELLET_DURATION = 15 * 60  # 15 seconds in frames
-ENEMY_RUNAWAY_COLOR = (255, 255, 255)  # Blue
+POWER_PELLET_DURATION = 100  # 5 seconds in frames

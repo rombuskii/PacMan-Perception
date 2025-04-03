@@ -66,6 +66,11 @@ class EnemyAI:
             self.current_mode = "run away"
             return
         
+        # If we were in run away mode but power pellet is no longer active, switch to patrol
+        if self.current_mode == "run away" and not game_map.is_power_pellet_active():
+            self.current_mode = "patrol"
+            return
+        
         # Check if enemy can see player
         can_see_player = self.perception.can_see_player(enemy_position, player_position, game_map)
         
