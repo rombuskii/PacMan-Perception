@@ -27,7 +27,7 @@ class Map:
         pacman_layout = [
             "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
             "W..........................S..W",
-            "W.WWWWW.WWWWWWW.WWWWWWW.WWWWW.W",
+            "W.WWWWW.WWWWWWWPWWWWWWW.WWWWW.W",
             "W.W   W.W     W.W     W.W   W.W",
             "W.W   W.W     W.W     W.W   W.W",
             "W.WWWWW.WWWWWWW.WWWWWWW.WWWWW.W",
@@ -76,6 +76,8 @@ class Map:
                     self.occupancy_map[i, j] = self.WALL
                 elif cell == '.':  # Regular pellet
                     self.occupancy_map[i, j] = self.REGULAR_PELLET
+                elif cell == 'P':  # Power pellet
+                    self.occupancy_map[i, j] = self.POWER_PELLET
                 elif cell == 'S':  # Sound pellet
                     self.occupancy_map[i, j] = self.SOUND_PELLET
                 elif cell == ' ':  # Empty space

@@ -31,6 +31,8 @@ class Renderer:
                     pygame.draw.rect(self.screen, WALL_COLOR, rect)
                 elif cell_value == 1:  # Regular pellet
                     pygame.draw.circle(self.screen, POINT_COLOR, rect.center, GRID_SIZE // 4)
+                elif cell_value == 2:  # Power pellet
+                    self._draw_power_pellet(rect.center)
                 elif cell_value == 3:  # Sound pellet
                     self._draw_sound_pellet(rect.center)
         
@@ -199,6 +201,20 @@ class Renderer:
             # Move to next position in this direction
             curr_row += dr
             curr_col += dc
+    
+    def _draw_power_pellet(self, center):
+        """Draw a power pellet with pulsing effect."""
+        # Create pulsing effect with time
+        current_time = pygame.time.get_ticks()
+        pulsing_factor = 0.8 + 0.4 * abs(((current_time % 1000) / 500) - 1)
+        
+        base_size = GRID_SIZE // 3
+        pulse_size = int(base_size * pulsing_factor)
+        
+        # Draw inner circle and outer ring
+        pygame.draw.circle(self.screen, POWER_PELLET_COLOR, center, pulse_size)
+        outer_size = pulse_size + 3
+        pygame.draw.circle(self.screen, POWER_PELLET_COLOR, center, outer_size, 2)
     
     def render(self, game_map, entity_manager, show_distance_map=False, distance_map=None):
         """Render the complete game state."""

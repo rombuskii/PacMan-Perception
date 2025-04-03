@@ -14,6 +14,7 @@ WALL_COLOR = (75, 0, 130)        # Purple
 POINT_COLOR = (0, 255, 0)     # Green
 SOUND_PALLET_COLOR = (255, 165, 0)  # Orange
 BG_COLOR = (0, 0, 0)          # Black
+POWER_PELLET_COLOR = (0, 191, 255)  # Deep Sky Blue
 
 # Enemy vision
 VISION_COLOR = (255, 0, 0, 70)  # Semi-transparent red
@@ -38,5 +39,5 @@ GAME_TITLE = "Pac-Man"
 FRAME_DELAY = 250
 FPS = 60 
 GAME_SPEED = 5 
-ENEMY_SPEED_FACTOR = 1.01
+ENEMY_SPEED_FACTOR = 1.05
 CHASE_DURATION = 3
