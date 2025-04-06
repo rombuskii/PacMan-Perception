@@ -679,6 +679,9 @@ class Game:
         # Update map state (power pellet duration, etc.)
         self.game_map.update()
         
+        # Update the current score
+        self.update_score()
+        
         # Continue player movement in current direction
         self.entity_manager.continue_player_movement()
         

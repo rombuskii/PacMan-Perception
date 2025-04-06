@@ -19,6 +19,8 @@ class Map:
         self.occupancy_map = np.zeros((ROWS, COLS))
         self.power_pellet_active = False
         self.power_pellet_duration = 0
+        self.dots_collected = 0
+        self.power_pellets_collected = 0
         self.generate_pacman_map()
     
     def generate_pacman_map(self):
@@ -108,8 +110,13 @@ class Map:
             is_power_pellet = (cell_value == self.POWER_PELLET)
             is_sound_pellet = (cell_value == self.SOUND_PELLET)
             
+            # Increment dots collected if it's a regular pellet
+            if cell_value == self.REGULAR_PELLET:
+                self.dots_collected += 1
+            
             # Activate power pellet effect if collected
             if is_power_pellet:
+                self.power_pellet_collected += 1
                 self._activate_power_pellet()
             
             # Clear the cell
