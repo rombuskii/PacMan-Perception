@@ -3,6 +3,7 @@ from config import DIRECTIONS, GAME_TITLE, FPS, GAME_SPEED, DISTANCE_MAP_VISIBLE
 from map import Map
 from entities import EntityManager
 from render import Renderer
+import sys
 
 class GameOverScreen:
     def __init__(self, screen, width, height, score=0):
@@ -241,6 +242,297 @@ class GameOverScreen:
         return None
 
 
+class StartScreen:
+    def __init__(self, screen, width, height):
+        self.screen = screen
+        self.width = width
+        self.height = height
+        
+        # Load or create fonts
+        try:
+            self.title_font = pygame.font.Font("fonts/arcade.ttf", 80)  # Arcade-style font if available
+        except:
+            self.title_font = pygame.font.Font(None, 80)
+            
+        try:
+            self.menu_font = pygame.font.Font("fonts/arcade.ttf", 36)
+        except:
+            self.menu_font = pygame.font.Font(None, 40)
+            
+        # Animation properties
+        self.flash_speed = 500  # Flash interval in milliseconds
+        self.last_flash_time = 0
+        self.show_text = True
+        
+        # Colors
+        self.colors = {
+            "black": (0, 0, 0),
+            "white": (255, 255, 255),
+            "yellow": (255, 255, 0),
+            "red": (255, 0, 0),
+            "blue": (0, 0, 255),
+            "pink": (255, 192, 203),
+            "orange": (255, 165, 0),
+            "cyan": (0, 255, 255)
+        }
+        
+        # Initialize ghosts
+        self.ghosts = []
+        ghost_colors = [self.colors["red"], self.colors["pink"], 
+                        self.colors["cyan"], self.colors["orange"]]
+        
+        for color in ghost_colors:
+            self.ghosts.append({
+                "x": pygame.time.get_ticks() % width,  # Distribute ghosts across screen
+                "y": 100 + (ghost_colors.index(color) * 50),  # Stack ghosts vertically with spacing
+                "speed": 2 + (ghost_colors.index(color) * 0.5),  # Different speeds
+                "color": color,
+                "direction": 1 if ghost_colors.index(color) % 2 == 0 else -1  # Alternate directions
+            })
+            
+        # Pac-Man animation properties
+        self.pacman_angle = 45  # Initial mouth opening angle
+        self.pacman_direction = 1  # Start by opening the mouth
+        self.pacman_x = self.width // 2
+        self.pacman_y = self.height // 3 + 100
+        
+        # Try to play a startup sound
+        try:
+            self.start_sound = pygame.mixer.Sound("sounds/intro.wav")
+            self.start_sound.play()
+        except:
+            pass  # Sound is optional
+            
+        # Instructions state
+        self.showing_instructions = False
+        
+    def draw_ghost(self, x, y, color):
+        """Draw a classic Pac-Man ghost"""
+        # Body
+        ghost_width = 40
+        ghost_height = 40
+        
+        # Main body (semi-oval)
+        pygame.draw.ellipse(self.screen, color, 
+                           (x - ghost_width//2, y - ghost_height//2, 
+                            ghost_width, ghost_height))
+        
+        # Bottom part with waves (three rectangles)
+        wave_height = 10
+        for i in range(3):
+            wave_width = ghost_width // 3
+            pygame.draw.rect(self.screen, color, 
+                            (x - ghost_width//2 + i*wave_width, 
+                             y + ghost_height//2 - wave_height,
+                             wave_width, wave_height))
+            
+        # White of eyes
+        eye_radius = 7
+        pygame.draw.circle(self.screen, self.colors["white"], 
+                          (x - 10, y - 7), eye_radius)
+        pygame.draw.circle(self.screen, self.colors["white"], 
+                          (x + 10, y - 7), eye_radius)
+        
+        # Blue pupils (looking in movement direction)
+        pupil_radius = 3
+        direction = 1 if color == self.colors["red"] else -1  # Red ghost goes right
+        
+        pygame.draw.circle(self.screen, self.colors["blue"], 
+                          (x - 10 + 3*direction, y - 7), pupil_radius)
+        pygame.draw.circle(self.screen, self.colors["blue"], 
+                          (x + 10 + 3*direction, y - 7), pupil_radius)
+
+    def draw_pacman(self, x, y):
+        """Draw animated Pac-Man"""
+        # Update animation
+        if self.pacman_direction == 1:
+            self.pacman_angle += 2
+            if self.pacman_angle >= 45:
+                self.pacman_direction = -1
+        else:
+            self.pacman_angle -= 2
+            if self.pacman_angle <= 5:
+                self.pacman_direction = 1
+                
+        angle = self.pacman_angle
+        start_angle = angle
+        end_angle = 360 - angle
+        
+        pygame.draw.arc(self.screen, self.colors["yellow"], 
+                       (x - 30, y - 30, 60, 60),
+                       pygame.math.Vector2(0, -1).angle_to(pygame.math.Vector2(1, 0)) * (start_angle/360),
+                       pygame.math.Vector2(0, -1).angle_to(pygame.math.Vector2(1, 0)) * (end_angle/360), 30)
+
+    def show_instructions(self):
+        """Display the instructions screen"""
+        # Black semi-transparent overlay
+        overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 220))  # Black with alpha
+        self.screen.blit(overlay, (0, 0))
+        
+        # Title
+        instr_title = self.menu_font.render("INSTRUCTIONS", True, self.colors["yellow"])
+        title_rect = instr_title.get_rect(center=(self.width // 2, 80))
+        self.screen.blit(instr_title, title_rect)
+        
+        # Instructions
+        instructions = [
+            "- Use arrow keys to move Pac-Man",
+            "- Collect all dots to win",
+            "- Avoid the ghosts or you'll lose a life",
+            "- Eat power pellets to hunt ghosts",
+            "- Press 'D' to toggle distance map visualization"
+        ]
+        
+        y_pos = 150
+        for instruction in instructions:
+            line = self.menu_font.render(instruction, True, self.colors["white"])
+            line_rect = line.get_rect(center=(self.width // 2, y_pos))
+            self.screen.blit(line, line_rect)
+            y_pos += 50
+        
+        # Back button
+        back_text = self.menu_font.render("BACK", True, self.colors["cyan"])
+        back_rect = back_text.get_rect(center=(self.width // 2, self.height - 100))
+        
+        # Highlight on hover
+        mouse_pos = pygame.mouse.get_pos()
+        if back_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(self.screen, (60, 60, 60), 
+                           back_rect.inflate(20, 10), border_radius=5)
+        
+        self.screen.blit(back_text, back_rect)
+        
+        # Handle input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.showing_instructions = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if back_rect.collidepoint(event.pos):
+                    self.showing_instructions = False
+        
+        pygame.display.flip()
+
+    def display(self):
+        """Display the start screen with animations and menu options"""
+        clock = pygame.time.Clock()
+        running = True
+
+        while running:
+            if self.showing_instructions:
+                self.show_instructions()
+                clock.tick(60)
+                continue
+                
+            self.screen.fill(self.colors["black"])
+            
+            # Maze background effect (faint grid lines)
+            for x in range(0, self.width, 30):
+                pygame.draw.line(self.screen, (20, 20, 70), (x, 0), (x, self.height), 1)
+            for y in range(0, self.height, 30):
+                pygame.draw.line(self.screen, (20, 20, 70), (0, y), (self.width, y), 1)
+
+            # Animated title with flashing effect
+            current_time = pygame.time.get_ticks()
+            if current_time - self.last_flash_time > self.flash_speed:
+                self.show_text = not self.show_text
+                self.last_flash_time = current_time
+                
+            if self.show_text:
+                # Draw with shadow for better visibility
+                title_shadow = self.title_font.render("PERCEPTRON", True, (50, 50, 100))
+                title_text = self.title_font.render("PERCEPTRON", True, self.colors["yellow"])
+                
+                shadow_pos = (self.width // 2 - title_shadow.get_width() // 2 + 3, 
+                              self.height // 5 + 3)
+                text_pos = (self.width // 2 - title_text.get_width() // 2, 
+                            self.height // 5)
+                
+                self.screen.blit(title_shadow, shadow_pos)
+                self.screen.blit(title_text, text_pos)
+                
+            # Moving ghosts in the background
+            for ghost in self.ghosts:
+                ghost["x"] += ghost["speed"] * ghost["direction"]
+                
+                # Bounce ghosts off the edges
+                if ghost["x"] < -30 or ghost["x"] > self.width + 30:
+                    ghost["direction"] *= -1
+                    
+                self.draw_ghost(ghost["x"], ghost["y"], ghost["color"])
+                
+            # Animated Pac-Man
+            self.draw_pacman(self.pacman_x, self.pacman_y)
+            
+            # Menu buttons with highlighting on hover
+            mouse_pos = pygame.mouse.get_pos()
+            button_spacing = 70
+            base_y = self.height // 2 + 50
+            
+            # Start button
+            start_text = self.menu_font.render("START GAME", True, self.colors["yellow"])
+            start_rect = start_text.get_rect(center=(self.width // 2, base_y))
+            
+            # Highlight on hover
+            if start_rect.collidepoint(mouse_pos):
+                pygame.draw.rect(self.screen, (60, 60, 60), 
+                               start_rect.inflate(20, 10), border_radius=5)
+            
+            self.screen.blit(start_text, start_rect)
+            
+            # Instructions button
+            inst_text = self.menu_font.render("INSTRUCTIONS", True, self.colors["yellow"])
+            inst_rect = inst_text.get_rect(center=(self.width // 2, base_y + button_spacing))
+            
+            # Highlight on hover
+            if inst_rect.collidepoint(mouse_pos):
+                pygame.draw.rect(self.screen, (60, 60, 60), 
+                               inst_rect.inflate(20, 10), border_radius=5)
+                
+            self.screen.blit(inst_text, inst_rect)
+            
+            # Quit button
+            quit_text = self.menu_font.render("QUIT", True, self.colors["yellow"])
+            quit_rect = quit_text.get_rect(center=(self.width // 2, base_y + button_spacing * 2))
+            
+            # Highlight on hover
+            if quit_rect.collidepoint(mouse_pos):
+                pygame.draw.rect(self.screen, (60, 60, 60), 
+                               quit_rect.inflate(20, 10), border_radius=5)
+                
+            self.screen.blit(quit_text, quit_rect)
+
+            pygame.display.flip()  # Update display
+
+            # Handle input events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return  # Start the game
+                    elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.key == pygame.K_i:
+                        self.showing_instructions = True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_rect.collidepoint(event.pos):
+                        return  # Start the game
+                    elif inst_rect.collidepoint(event.pos):
+                        self.showing_instructions = True
+                    elif quit_rect.collidepoint(event.pos):
+                        pygame.quit()
+                        sys.exit()
+
+            # Control frame rate
+            clock.tick(60)
+
 class Game:
     def __init__(self):
         """Initialize the game components and state."""
@@ -252,6 +544,10 @@ class Game:
         self.game_map = Map()
         self.entity_manager = EntityManager(self.game_map)
         self.renderer = Renderer()
+        screen_width = self.renderer.screen.get_width()
+        screen_height = self.renderer.screen.get_height()
+        start_screen = StartScreen(self.renderer.screen, screen_width, screen_height)
+        start_screen.display()
         
         # Add enemies to the game
         self._setup_enemies()
