@@ -515,7 +515,7 @@ class StartScreen:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        return  # Start the game
+                        return 
                     elif event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                         pygame.quit()
                         sys.exit()
@@ -523,7 +523,7 @@ class StartScreen:
                         self.showing_instructions = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if start_rect.collidepoint(event.pos):
-                        return  # Start the game
+                        return 
                     elif inst_rect.collidepoint(event.pos):
                         self.showing_instructions = True
                     elif quit_rect.collidepoint(event.pos):
@@ -572,7 +572,7 @@ class Game:
         """Set up enemy entities in the game."""
         self.entity_manager.add_enemy(x=5, y=11)
         # Add more enemies as needed
-        self.entity_manager.add_enemy(x=10, y=11)
+        self.entity_manager.add_enemy(x=15, y=11)
         self.entity_manager.add_enemy(x=30, y=11)
         self.entity_manager.add_enemy(x=20, y=11)
 
@@ -606,13 +606,10 @@ class Game:
     
     def _toggle_distance_map(self):
         """Toggle the distance map visualization on/off."""
-        self.show_distance_map = not self.show_distance_map
-        print(f"Distance map visualization: {'ON' if self.show_distance_map else 'OFF'}")
-        
+        self.show_distance_map = not self.show_distance_map        
         # Immediately calculate the distance map when turning visualization on
         if self.show_distance_map and len(self.entity_manager.enemies) > 0:
             self._update_distance_map()
-            print("Distance map calculated")
     
     def _update_distance_map(self):
         """Update the distance map for visualization."""
@@ -676,23 +673,12 @@ class Game:
     
     def update(self):
         """Update game state for one time step."""
-        # Update map state (power pellet duration, etc.)
         self.game_map.update()
-        
-        # Update the current score
         self.update_score()
-        
-        # Continue player movement in current direction
         self.entity_manager.continue_player_movement()
-        
-        # Update the distance map if visualization is enabled
         if self.show_distance_map:
             self._update_distance_map()
-        
-        # Move enemies
-        self.entity_manager.move_enemies()
-        
-        # Check game end conditions
+        self.entity_manager.move_enemies()   
         self._check_game_end_conditions()
     
                 

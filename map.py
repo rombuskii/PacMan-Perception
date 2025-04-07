@@ -145,7 +145,3 @@ class Map:
     def is_power_pellet_active(self):
         """Check if a power pellet effect is currently active."""
         return self.power_pellet_active
-    
-    def generate_map(self, wall_probability):
-        """Legacy method kept for backward compatibility."""
-        self.generate_pacman_map() 

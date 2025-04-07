@@ -102,18 +102,13 @@ class Renderer:
     
     def _draw_distance_cell(self, rect, distance, max_distance):
         """Draw a cell with distance information."""
-        # Normalize distance value between 0 and 1
         norm_dist = distance / max_distance
         
-        # Interpolate between min and max colors
         r = int(DISTANCE_MAP_COLOR_MIN[0] + (DISTANCE_MAP_COLOR_MAX[0] - DISTANCE_MAP_COLOR_MIN[0]) * norm_dist)
         g = int(DISTANCE_MAP_COLOR_MIN[1] + (DISTANCE_MAP_COLOR_MAX[1] - DISTANCE_MAP_COLOR_MIN[1]) * norm_dist)
         b = int(DISTANCE_MAP_COLOR_MIN[2] + (DISTANCE_MAP_COLOR_MAX[2] - DISTANCE_MAP_COLOR_MIN[2]) * norm_dist)
         
-        # Draw rectangle with alpha
         pygame.draw.rect(self.distance_map_surface, (r, g, b, DISTANCE_MAP_OPACITY), rect)
-        
-        # Draw the distance value as text
         font = pygame.font.SysFont(None, 16)
         text = font.render(str(int(distance)), True, (255, 255, 255))
         text_rect = text.get_rect(center=rect.center)

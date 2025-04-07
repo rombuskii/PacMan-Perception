@@ -5,7 +5,6 @@ from config import CHASE_DURATION
 class EnemyPerception:
 
     def calculate_distance(self, start_position, target_position):
-        """Calculate the Manhattan distance between two positions."""
         return abs(start_position[0] - target_position[0]) + abs(start_position[1] - target_position[1])
 
     def can_see_player(self, enemy_position, player_position, game_map):
@@ -42,12 +41,12 @@ class EnemyAI:
     def __init__(self):
         self.perception = EnemyPerception()
         self.current_mode = "patrol"  # patrol, chase, run away, investigate_sound
-        self.patrol_direction = [0, 1]  # Initialize with a default direction
-        self.is_horizontal = True  # Track if moving horizontally or vertically
-        self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+        self.patrol_direction = [0, 1] 
+        self.is_horizontal = True  
+        self.directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  
         self.chase_timer = CHASE_DURATION
         self.last_update_time = 0
-        self.sound_location = None  # Store sound pellet location when heard
+        self.sound_location = None 
     
     def update_mode(self, enemy_position, player_position, game_map, sound_position=None, current_time=None):
         """Update the AI mode based on the game state."""
