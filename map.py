@@ -28,37 +28,37 @@ class Map:
         # Define the layout with a larger scale
         pacman_layout = [
             "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW",
-            "W..........................S..W",
-            "W.WWWWW.WWWWWWWPWWWWWWW.WWWWW.W",
-            "W.W   W.W     W.W     W.W   W.W",
-            "W.W   W.W     W.W     W.W   W.W",
-            "W.WWWWW.WWWWWWW.WWWWWWW.WWWWW.W",
+            "W.............................W",
+            "W.WWWWW.WWWWWWWWWWWWWWW.WWWWW.W",
+            "W.W   W.W             W.W   W.W",
+            "W.W   W.W             W.W   W.W",
+            "W.WWWWW.WWWWWWWWWWWWWWW.WWWWW.W",
             "W.............................W",
             "W.WWWWW.WW.WWWWWWWWW.WW.WWWWW.W",
             "W.WWWWW.WW.WWWWWWWWW.WW.WWWWW.W",
-            "W.......WW.....W.....WW.......W",
+            "W.......WW....WW.....WW.......W",
             "WWWWWWW.WWWWW.WW.WWWWWW.WWWWWWW",
             "      W.WWWWW.WW.WWWWWW.W      ",
             "      W.................W      ",
             "      W.WWWWWWWWWWWWWWW.W      ",
-            "      W.................W      ",
+            "      W........S........W      ",
             "      W.WWWWWWWWWWWWWWW.W      ",
-            "      W.................W      ",
+            "      W........P........W      ",
             "      W.WWWWWWWWWWWWWWW.W      ",
-            "      W.................W      ",
+            "      W........S........W      ",
             "      W.WW.WWWWWWWW.WWW.W      ",
             "      W.WW.WWWWWWWW.WWW.W      ",
             "WWWWWWW.WW.WWWWWWWW.WWW.WWWWWWW",
             "W.............................W",
             "W.WWWWW.WWWWW.W.W.WWWWW.WWWWW.W",
             "W.WWWWW.WWWWW.W.W.WWWWW.WWWWW.W",
-            "W...WW..............WW........W",
+            "W...WW.........S....WW........W",
             "WWW.WW.WW.WWWWWWWWW.WW.WW.WWWWW",
             "WWW.WW.WW.WWWWWWWWW.WW.WW.WWWWW",
             "W.............................W",
             "W.WWWWWWWWWWW.W.W.WWWWWWWWWWW.W",
             "W.WWWWWWWWWWW.W.W.WWWWWWWWWWW.W",
-            "W.............................W",
+            "W..............S..............W",
             "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
         ]
         
@@ -116,7 +116,7 @@ class Map:
             
             # Activate power pellet effect if collected
             if is_power_pellet:
-                self.power_pellet_collected += 1
+                self.power_pellets_collected += 1
                 self._activate_power_pellet()
             
             # Clear the cell
